@@ -6,7 +6,9 @@ const config = {
     user: env.DB_USER || 'root',
     password: env.DB_PASSWORD || 'Pa55word',
     database: env.DB_NAME || 'stocks',
-  }
+  },
+  alphaVantageApiUrl: 'https://www.alphavantage.co/',
+  alphaVantageApiKey: 'RDHWB3SUU8YDH8C2'
 };
   
 module.exports = config;

@@ -23,6 +23,7 @@
   "homepage": "https://github.com/amitpanda007/stocks-node-api#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "mysql2": "^2.2.5"
+    "mysql2": "^2.2.5",
+    "request": "^2.88.2"
   }
 }
