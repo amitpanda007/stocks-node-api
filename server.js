@@ -1,9 +1,11 @@
-const express = require('express');
-const bodyParser = require('body-parser');
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 3000;
-const stocksData = require('./routes/stocksData');
+const stocksData = require("./routes/stocksData");
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
@@ -11,22 +13,21 @@ app.use(
   })
 );
 
-app.get('/', (req, res) => {
-  res.json({'message': 'ok'});
-})
+app.get("/", (req, res) => {
+  res.json({ message: "ok" });
+});
 
-
-app.use('/stocks', stocksData);
+app.use("/stocks", stocksData);
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   console.error(err.message, err.stack);
-  res.status(statusCode).json({'message': err.message});
-  
+  res.status(statusCode).json({ message: err.message });
+
   return;
 });
 
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Example app listening at http://localhost:${port}`);
 });

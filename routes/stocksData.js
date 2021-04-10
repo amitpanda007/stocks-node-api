@@ -1,66 +1,74 @@
-const express = require('express');
+const express = require("express");
+const fetch = require("node-fetch");
 const router = express.Router();
-const request = require('request');
-const config = require('../config');
-
+const config = require("../config");
 
 /* GET Stocks Data. */
-router.get('/', async function(req, res, next) {
+router.get("/", async function (req, res, next) {
   try {
-    res.json({'message': 'Working'});
+    res.json({ message: "Working" });
   } catch (err) {
     console.error(`Error while getting stocks data`, err.message);
     next(err);
   }
 });
 
-function getStockSymbol(searchText) {
+async function getStockSymbol(searchText) {
+  try {
     const apiUrl = `${config.alphaVantageApiUrl}query?function=SYMBOL_SEARCH&keywords=${searchText}&apikey=${config.alphaVantageApiKey}`;
-    
-    // resp = requests.get(_url).json()
-    // try:
-    //     stock_symbols_list = resp['bestMatches']
-    //     for item in stock_symbols_list:
-    //         if 'India' in item['4. region']:
-    //             # print(item)
-    //             return item['1. symbol'], item['2. name']
-    // except KeyError:
-    //     print("Error happened while parsing response of stock symbol search")
-    // return '',''
+    console.log(`Making API Request: ${apiUrl}`);
+    const response = await fetch(apiUrl);
+    const stocks = await response.json();
 
+    if (stocks["bestMatches"]) {
+      const stockData = stocks["bestMatches"];
+      for (let i = 0; i < stockData.length; i++) {
+        let stock = stockData[i];
+        if (stock["4. region"].includes("India")) {
+          const stockInfo = {
+            symbol: stock["1. symbol"],
+            stockName: stock["2. name"],
+            status: true,
+          };
+          return stockInfo;
+        }
+      }
+      return { status: false };
+    }
+  } catch (error) {
+    console.log(error.response.body);
+  }
 }
 
-router.get('/:stockName', async function(req, res, next) {
-    try {
-        const stockName = req.params.stockName;
+router.get("/:stockName", async function (req, res, next) {
+  try {
+    const stockName = req.params.stockName;
+    const stockSymbol = await getStockSymbol(stockName);
 
-        // api_url = 'https://www.alphavantage.co/query?'
-        // print(get_stock_symbol(stock_name))
-        // stock_symbol, stock_name = get_stock_symbol(stock_name)
-        // if stock_symbol == '' or stock_name == '':
-        //     return {'errorCode': 50001, 'message': 'Unable to find Stocks with the search name provided.'}
-
-        // _url = f'{api_url}function=TIME_SERIES_DAILY&symbol={stock_symbol}&apikey={ALPHA_VANTAGE_API_KEY}'
-        // resp = requests.get(_url).json()
-        // resp['Meta Data']['6. Name'] = stock_name
-        // return resp
-
-        reqUrl = `${config.alphaVantageApiUrl}query?function=SYMBOL_SEARCH&keywords=${searchText}&apikey=${config.alphaVantageApiKey}`;
-        request(reqUrl, { json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
-            
-        });
-        res.json({'message': 'Working'});
-    } catch (err) {
-      console.error(`Error while getting stocks data`, err.message);
-      next(err);
+    // When no data found
+    if (stockSymbol.status == false) {
+      res.json({
+        errorCode: 50001,
+        message: "Unable to find Stocks with the search name provided.",
+      });
     }
-  });
+    console.log(stockSymbol);
+    reqUrl = `${config.alphaVantageApiUrl}query?function=TIME_SERIES_DAILY&symbol=${stockSymbol.symbol}&apikey=${config.alphaVantageApiKey}`;
+    console.log(`Making API Request: ${reqUrl}`);
+    const response = await fetch(reqUrl);
+    let stocksData = await response.json();
+    // console.log(stocksData);
+    stocksData["Meta Data"]["6. Name"] = stockSymbol.stockName;
+    res.send(stocksData);
+  } catch (err) {
+    console.error(`Error while getting stocks data`, err.message);
+    next(err);
+  }
+});
 
 /* POST programming language */
-router.post('/', async function(req, res, next) {
+router.post("/", async function (req, res, next) {
   try {
-    
   } catch (err) {
     console.error(`Error while creating`, err.message);
     next(err);
@@ -68,9 +76,8 @@ router.post('/', async function(req, res, next) {
 });
 
 /* PUT programming language */
-router.put('/:id', async function(req, res, next) {
+router.put("/:id", async function (req, res, next) {
   try {
-    
   } catch (err) {
     console.error(`Error while updating`, err.message);
     next(err);
@@ -78,9 +85,8 @@ router.put('/:id', async function(req, res, next) {
 });
 
 /* DELETE programming language */
-router.delete('/:id', async function(req, res, next) {
+router.delete("/:id", async function (req, res, next) {
   try {
-    
   } catch (err) {
     console.error(`Error while deleting`, err.message);
     next(err);
