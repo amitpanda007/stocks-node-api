@@ -2,6 +2,7 @@ const express = require("express");
 const fetch = require("node-fetch");
 const router = express.Router();
 const config = require("../config");
+const common = require("../services/common");
 
 /* GET Stocks Data. */
 router.get("/", async function (req, res, next) {
@@ -57,9 +58,11 @@ router.get("/:stockName", async function (req, res, next) {
     console.log(`Making API Request: ${reqUrl}`);
     const response = await fetch(reqUrl);
     let stocksData = await response.json();
+    console.log("Received Response");
     // console.log(stocksData);
     stocksData["Meta Data"]["6. Name"] = stockSymbol.stockName;
-    res.send(stocksData);
+    const formattedData = common.formatStocksResponse(stocksData);
+    res.send(formattedData);
   } catch (err) {
     console.error(`Error while getting stocks data`, err.message);
     next(err);
