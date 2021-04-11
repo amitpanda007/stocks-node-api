@@ -1,3 +1,5 @@
+const dateFormat = require("dateformat");
+
 function formatStocksResponse(data) {
   const stocksMetaData = data["Meta Data"];
   const timeSeries = data["Time Series (Daily)"];
@@ -14,6 +16,11 @@ function formatStocksResponse(data) {
   let stocksData = [];
   Object.entries(timeSeries).forEach((stockPerDay) => {
     const stockDate = stockPerDay[0];
+
+    // Convert Date
+    const newDate = new Date(stockDate).toDateString();
+    const formatDate = dateFormat(newDate, "dd-mmm-yy");
+
     const singleStockData = {
       open: stockPerDay[1]["1. open"],
       high: stockPerDay[1]["2. high"],
@@ -23,7 +30,7 @@ function formatStocksResponse(data) {
     };
 
     const perDayData = {
-      date: stockDate,
+      date: formatDate,
       stock: singleStockData,
     };
     stocksData.push(perDayData);
